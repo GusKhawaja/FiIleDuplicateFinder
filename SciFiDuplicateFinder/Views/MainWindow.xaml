@@ -1,0 +1,149 @@
+﻿<Window x:Class="SciFiDuplicateFinder.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:SciFiDuplicateFinder.ViewModels"
+        Title="Sci-Fi Files Duplicate Finder"
+        Icon="filesicon.ico"
+        Width="900" Height="600">
+
+    <!-- The DataContext is the MainViewModel -->
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <!-- Some sci-fi styling resources -->
+    <Window.Resources>
+
+        <!-- A neon-like gradient background brush -->
+        <LinearGradientBrush x:Key="SciFiBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#FF001826"/>
+            <!-- Darkish Blue -->
+            <GradientStop Offset="1" Color="#FF0B0033"/>
+            <!-- Very dark purple/blue -->
+        </LinearGradientBrush>
+
+        <!-- A style for Buttons with neon vibe -->
+        <Style x:Key="SciFiButton" TargetType="Button">
+            <Setter Property="Background" Value="#FF00FFCC" />
+            <!-- Neon aqua/green -->
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="BorderBrush" Value="Aqua" />
+            <Setter Property="BorderThickness" Value="2" />
+            <!-- Add transitions, or triggers for hover, etc., if you like -->
+        </Style>
+
+        <!-- A style for the DataGrid with a futuristic color scheme -->
+        <Style x:Key="SciFiDataGrid" TargetType="DataGrid">
+            <Setter Property="Background" Value="#FF111111"/>
+            <!-- Dark background -->
+            <Setter Property="Foreground" Value="#FF00FFCC"/>
+            <!-- Neon text -->
+            <Setter Property="BorderBrush" Value="Aqua"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="#FF222222"/>
+            <Setter Property="AlternatingRowBackground" Value="#FF2A2A2A"/>
+            <!-- <Setter Property="SelectionBrush" Value="#FF00FFCC"/> --> 
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Foreground" Value="DarkBlue"/>
+                        <!-- You can add more styling here if desired, e.g. font family, bold, etc. -->
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- Apply the gradient background to the entire window -->
+    <Grid Background="{StaticResource SciFiBackground}" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Path input and buttons -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Label Content="Select Path:" 
+                   Foreground="Aqua" 
+                   FontWeight="Bold"
+                   VerticalAlignment="Center" />
+
+            <TextBox Text="{Binding SelectedPath, UpdateSourceTrigger=PropertyChanged}"
+                     Width="300" Margin="5,0" 
+                     VerticalAlignment="Center"
+                     FontFamily="Consolas"
+                     Foreground="#FF00FFCC"
+                     Background="#FF111111" />
+
+            <!-- Buttons with SciFiButton style -->
+            <Button Style="{StaticResource SciFiButton}"
+                    Content="Scan" 
+                    Command="{Binding ScanCommand}" />
+            <Button Style="{StaticResource SciFiButton}"
+                    Content="Stop" 
+                    Command="{Binding StopCommand}" />
+            <Button Style="{StaticResource SciFiButton}"
+                    Content="Export" 
+                    Command="{Binding ExportCommand}" />
+        </StackPanel>
+
+        <!-- Row 1: CurrentFile Label -->
+        <TextBlock Grid.Row="1" 
+                   Text="{Binding CurrentFile}" 
+                   Foreground="#FF00FFCC"
+                   FontFamily="Consolas"
+                   FontWeight="Bold" 
+                   Margin="5,10,0,10"/>
+
+        <!-- Row 2: Duplicates Count -->
+        <TextBlock Grid.Row="2"
+                   Text="{Binding DuplicatesCount, StringFormat='Duplicates Found: {0}'}"
+                   Foreground="Yellow"
+                   FontWeight="Bold"
+                   Margin="5,0,0,10" />
+
+        <!-- Row 3: DataGrid of duplicates -->
+        <DataGrid Grid.Row="3"
+                  ItemsSource="{Binding Duplicates}" 
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True"
+                  Style="{StaticResource SciFiDataGrid}"
+                  Margin="0,10,0,10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="File Path" Binding="{Binding FolderPath}" Width="2*" />
+                <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="2*" />
+                <DataGridTextColumn Header="File Size (Bytes)" Binding="{Binding FileSize}" Width="*" />
+                <DataGridTemplateColumn Header="Delete" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource SciFiButton}"
+                                    Content="Delete"
+                                    Command="{Binding DataContext.DeleteCommand, 
+                                              RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Row 4: ProgressBar -->
+        <ProgressBar Grid.Row="4" 
+                     Height="25" 
+                     Value="{Binding ProgressValue}" 
+                     Maximum="100"
+                     Margin="0,0,0,10"
+                     Foreground="#FF00FFCC"
+                     BorderBrush="Aqua"
+                     BorderThickness="2"
+                     Background="#FF222222" />
+    </Grid>
+</Window>
